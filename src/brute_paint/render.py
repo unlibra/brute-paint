@@ -165,12 +165,13 @@ def _ref_sheet(icon: Image.Image, character: Path, cache_dir: Path) -> Image.Ima
         thumbs.append(t)
     font = _font(18)
     keep = [line.lstrip("-* ").strip() for line in sections.get("変えない特徴", [])]
+    # The features matter more than a tidy width: with any text, use the full width so lines wrap, not clip.
+    width = MAX_SHEET_WIDTH if keep else 400 + sum(t.width + GAP for t in thumbs)
     text_lines = []
     for item in keep:
-        text_lines += _wrap(f"・{item}", font, MAX_SHEET_WIDTH - 2 * GAP)
+        text_lines += _wrap(f"・{item}", font, width - 2 * GAP)
     text_h = (len(text_lines) + 1) * 26 + GAP if text_lines else 0
-    width = min(400 + sum(t.width + GAP for t in thumbs), MAX_SHEET_WIDTH)
-    sheet = Image.new("RGB", (max(width, 400), 400 + text_h), BG)
+    sheet = Image.new("RGB", (width, 400 + text_h), BG)
     sheet.paste(icon.resize((400, 400), Image.LANCZOS), (0, 0))
     x = 400 + GAP
     for t in thumbs:

@@ -4,7 +4,7 @@ import pytest
 from PIL import Image
 
 from brute_paint.cli import main
-from brute_paint.render import MAX_SHEET_WIDTH, TOOL_ROOT, RenderError, render
+from brute_paint.render import BG, MAX_SHEET_WIDTH, TOOL_ROOT, RenderError, render
 
 SCRIPT = """
 from brute_paint import rgb
@@ -82,6 +82,18 @@ def test_ref_sheet_written_when_character_md_exists(work):
     ref = Image.open(work / "out" / "ref_sheet.png")
     assert ref.height > 400  # the "do not change" text sits under the images
     assert len(list((work / "out" / "ref_cache").iterdir())) == 2
+
+
+@pytest.mark.parametrize("refs", [(), ("a.png",)])
+def test_long_features_are_not_cut_at_the_right_edge(work, refs):
+    long_item = "前髪はぱっつんで、目にかかる長さ。毛先に向かってピンクが強くなる。" * 3
+    text = CHARACTER.replace("- 青い丸", f"- {long_item}")
+    text = text.replace("- refs/a.png\n- `refs/b.png`", "\n".join(f"- refs/{n}" for n in refs))
+    _add_character(work, refs=refs, text=text)
+    render(work / "draw.py")
+    sheet = Image.open(work / "out" / "ref_sheet.png").convert("RGB")
+    text_area = sheet.crop((sheet.width - 8, 400, sheet.width, sheet.height))
+    assert all(px == BG for px in text_area.get_flattened_data())
 
 
 def test_only_first_five_references_are_used(work):
