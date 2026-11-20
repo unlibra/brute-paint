@@ -1,0 +1,25 @@
+[project]
+name = "brute-paint"
+version = "0.1.0"
+description = "Draw illustrations purely with code and LLM feedback loops - no diffusion models involved."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.12"
+dependencies = [
+    "numpy>=2.0",
+    "pillow>=11.0",
+    "skia-python>=138.0",
+]
+
+[project.scripts]
+brute-paint = "brute_paint.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8.0"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.ruff]
+line-length = 120
